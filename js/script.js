@@ -1,5 +1,5 @@
 var appEstudiantes = (function () {
-    var objEstudiante = new Object();    
+    var objEstudiante = new Object();
     var indice = 0;
 
     var cargarCodigo = function (indice) {
@@ -23,31 +23,35 @@ var appEstudiantes = (function () {
             total += parseInt(objEstudiante[key].nota);
         });
         promedio = total / longitud;
-        alert("El promedio general de Notas entre "+longitud+" estudiante(s) es de "+promedio);
+        promedio = Math.round(promedio * 100) / 100;
+        var mensaje = "El promedio general de Notas entre " + longitud + " estudiante(s) es de " + promedio
+        mostrarMensaje("alert-warning",mensaje);
+        alert(mensaje);
     }
     var traerMaxMinNota = function () {
         var opcion = this.getAttribute("data-opcion");
         var longitud = Object.keys(objEstudiante).length;
         var notas = new Array();
-        var tipo = "";
-        var valor = "";
-        var mensaje = "";
         Object.keys(objEstudiante).forEach(function (key) {
             notas.push(parseInt(objEstudiante[key].nota));
         });
-        console.log(notas);
-        var maximo = Math.max.apply(null, notas); console.log(maximo);
-        var minimo = Math.min.apply(null, notas); console.log(minimo);
-        if(opcion=="max"){
-            tipo = "maxima";
-            valor = maximo;
-        }else {
-            tipo = "minima";
-            valor = minimo;
-        }
-        mensaje = "La nota "+tipo+" obtenida entre "+longitud+" estudiante(es) es de "+valor;
+        var maximo = Math.max.apply(null, notas);
+        var minimo = Math.min.apply(null, notas);
+        var tipo = (opcion == "max") ? "maxima" : "minima";
+        var valor = (opcion == "max") ? maximo : minimo;
+        var clase = (opcion == "max") ? "alert-success" : "alert-danger";
+        var mensaje = "La nota " + tipo + " obtenida entre " + longitud + " estudiante(es) es de " + valor;
+        mostrarMensaje(clase,mensaje);
         alert(mensaje);
-    }    
+    }
+    var mostrarMensaje = function (clase, mensajeAccion) {
+        var mensaje = document.getElementById("mensaje");
+        mensaje.className = "";
+        mensaje.classList.remove("d-none");
+        mensaje.textContent = mensajeAccion;
+        mensaje.classList.add("alert");
+        mensaje.classList.add(clase);
+    }
     var habilitarEventos = function () {
         var btnRegistrar = document.getElementById("btnRegistrar");
         var btnPromediar = document.getElementById("btnPromediar");
@@ -57,6 +61,9 @@ var appEstudiantes = (function () {
         var userCodigo = document.getElementById("userCodigo");
         var userNombre = document.getElementById("userNombre");
         var userNota = document.getElementById("userNota");
+        var helpCodigo = document.getElementById("helpCodigo");
+        var helpNombre = document.getElementById("helpNombre");
+        var helpNota = document.getElementById("helpNota");
 
         userNota.addEventListener("keyup", soloNumeros);
         btnRegistrar.addEventListener("click", function () {
@@ -66,31 +73,28 @@ var appEstudiantes = (function () {
             objAlumno['nombre'] = userNombre.value;
             objAlumno['nota'] = userNota.value;
 
-            document.getElementById("helpCodigo").classList.add("d-none");
-            document.getElementById("helpNombre").classList.add("d-none");
-            document.getElementById("helpNota").classList.add("d-none");
+            helpCodigo.classList.add("d-none");
+            helpNombre.classList.add("d-none");
+            helpNota.classList.add("d-none");
 
             if (objAlumno['codigo'] == "") {
-                document.getElementById("helpCodigo").classList.remove("d-none");
+                helpCodigo.classList.remove("d-none");
                 valid++;
             }
             if (objAlumno['nombre'] == "") {
-                document.getElementById("helpNombre").classList.remove("d-none");
+                helpNombre.classList.remove("d-none");
                 valid++;
             }
             if (objAlumno['nota'] == "" || objAlumno['nota'] < 0 || objAlumno['nota'] > 20) {
-                document.getElementById("helpNota").classList.remove("d-none");
+                helpNota.classList.remove("d-none");
                 valid++;
             }
 
             if (valid == 0) {
                 objEstudiante[indice] = objAlumno; //JSON.stringify(objAlumno);
                 indice++;
-
-                console.log(objEstudiante);
-
+                //console.log(objEstudiante);
                 if (indice <= 1) tblResultados.getElementsByTagName("tr")[1].style.display = "none"; //.deleteRow(1);
-
                 var fila = tblResultados.insertRow(indice);
                 var celda1 = fila.insertCell(0);
                 var celda2 = fila.insertCell(1);
@@ -106,11 +110,13 @@ var appEstudiantes = (function () {
                 document.getElementById("myForm").reset();
                 cargarCodigo(indice);
                 valid = 0;
+                var mensaje = "Estudiante "+objAlumno['nombre']+" - "+objAlumno['codigo']+" fue registrado correctamente.";
+                mostrarMensaje("alert-primary",mensaje);
             }
         });
-        btnPromediar.addEventListener("click",traerPromedioNotas);
-        btnNotaMayor.addEventListener("click",traerMaxMinNota);
-        btnNotaMenor.addEventListener("click",traerMaxMinNota);
+        btnPromediar.addEventListener("click", traerPromedioNotas);
+        btnNotaMayor.addEventListener("click", traerMaxMinNota);
+        btnNotaMenor.addEventListener("click", traerMaxMinNota);
     }
     return {
         iniciarRegistro: function () {
